@@ -1,0 +1,15 @@
+[Unit]
+Description=Commandes de démarrage de la VM (cmd: du yml)
+After=network.target docker.socket
+Wants=docker.socket
+
+[Service]
+# simple: ne retarde ni le shell ni "Startup finished"
+Type=simple
+RemainAfterExit=yes
+User=__USER__
+WorkingDirectory=~
+ExecStart=/usr/local/bin/vm-start.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,4 @@
+services:
+  lab_ttyd_base:
+    image: lab_ttyd_base:latest
+    container_name: lab_apache_php

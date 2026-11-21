@@ -1,0 +1,5 @@
+services:
+  lab_apache_php:
+    image: lab_apache_php:latest
+    container_name: lab_apache_php
+    

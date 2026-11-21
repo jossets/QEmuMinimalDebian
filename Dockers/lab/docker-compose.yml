@@ -1,0 +1,28 @@
+services:
+
+
+  lab_ttyd_base:
+    image: lab_ttyd_base:latest
+    container_name: lab_ttyd_base
+    ports:
+      - "3000:3000"
+    networks:
+      yolo_lan:
+        ipv4_address: 10.0.1.10
+
+
+  lab_apache_php:
+    image: lab_apache_php:latest
+    container_name: lab_apache_php
+    networks:
+      yolo_lan:
+        ipv4_address: 10.0.1.11
+
+      
+networks:
+  yolo_lan:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.1.0/24
+          gateway: 10.0.1.1

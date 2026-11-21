@@ -1,0 +1,12 @@
+# secrets & artefacts
+VMs/creds/id_rsa
+cache/
+work/
+VMs/qcow2/*.qcow2
+conf.cfg
+VMs/overlays/
+perf/
+__pycache__/
+*.pyc
+VMs/creds/*.ppk
+nul

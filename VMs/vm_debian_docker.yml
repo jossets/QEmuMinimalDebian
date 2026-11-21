@@ -1,0 +1,35 @@
+# Spécification de la VM "debian_docker" — consommée par scripts/build.py
+name: debian_docker
+base_url: https://cloud.debian.org/images/cloud/trixie/latest/
+base: debian-13-genericcloud-amd64.qcow2   # image cloud Debian 13 (cache dans cache/)
+img: debian-docker.qcow2                   # sortie -> VMs/qcow2/
+hostname: debian-docker
+disk_size: 12G
+build_memory: 1024      # RAM de la VM pendant la construction (Mo)
+build_cpus: 2
+packages:               # installés avec --no-recommends
+  - docker.io           # paquet Debian (daemon), docker.socket activé à la demande
+  - docker-cli          # commande `docker` (Recommends de docker.io, donc à lister)
+  - docker-compose      # plugin `docker compose` (v2)
+  - iptables            # réseau des conteneurs
+users:
+  - name: yolo
+    id_rsa: creds/id_rsa
+    id_rsa_pub: creds/id_rsa.pub
+    sudo: true
+    groups: [docker]    # ajouté après l'installation des paquets (si le groupe existe)
+    autologin: true     # autologin sur la console série (arrive directement sur un shell)
+docker_images:
+  - lab_ttyd_base:latest
+  - lab_apache_php:latest
+files:
+  - lab/docker-compose.yml
+cmd:
+  - cd lab && docker compose up -d 
+  - touch /tmp/working.txt
+ports:
+  - 2222:22
+  - 3000:3000 
+
+
+

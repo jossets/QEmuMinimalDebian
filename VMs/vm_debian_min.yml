@@ -1,0 +1,16 @@
+# Spécification de la VM "debian_min" — consommée par scripts/build.py
+name: debian_min
+base_url: https://cloud.debian.org/images/cloud/trixie/latest/
+base: debian-13-genericcloud-amd64.qcow2   # image cloud Debian 13 (cache dans cache/)
+img: debian-min.qcow2                      # sortie -> VMs/qcow2/
+hostname: debian-min
+disk_size: 3G
+build_memory: 1024      # RAM de la VM pendant la construction (Mo)
+build_cpus: 2
+packages: []            # paquets en plus de la base (openssh-server est déjà présent)
+users:
+  - name: yolo
+    id_rsa: creds/id_rsa
+    id_rsa_pub: creds/id_rsa.pub
+    sudo: true
+    autologin: true     # autologin sur la console série (arrive directement sur un shell)
