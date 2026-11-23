@@ -9,7 +9,7 @@ Pipeline (cf. README):
   5. attend l'arrêt, produit deux images dans VMs/qcow2/: <img> (non compressée)
      et <img>-compressed.qcow2 (compressée zstd, plus petite à distribuer)
 
-Usage:  python scripts/build.py vm_debian_min [--keep-work]
+Usage:  python scripts/build.py vm_debian_min [--keep-work] [--nodockerbuild]
 """
 import argparse
 import functools
@@ -123,9 +123,20 @@ def wait_ssh(port, timeout, proc):
     sys.exit("Timeout en attendant SSH")
 
 
-def build_docker_images(spec: dict) -> list:
-    """Build sur l'hôte (Docker Desktop). 'lab_ttyd_base:latest' <- Dockers/lab-ttyd-base/."""
+def build_docker_images(spec: dict, rebuild: bool = True) -> list:
+    """Build sur l'hôte (Docker Desktop). 'lab_ttyd_base:latest' <- Dockers/lab-ttyd-base/.
+
+    rebuild=False (--nodockerbuild): pas de build, on vérifie seulement que les images existent
+    déjà dans Docker, et ce sont elles qui seront uploadées dans la VM.
+    """
     images = spec.get("docker_images") or []
+    if not rebuild:
+        for img in images:
+            if subprocess.run(["docker", "image", "inspect", img], stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL).returncode != 0:
+                sys.exit(f"Image docker absente: {img} (la construire, ou retirer --nodockerbuild)")
+            print(f"docker: {img} réutilisée sans rebuild")
+        return images
     for img in images:
         ctx = ROOT / "Dockers" / img.split(":")[0].replace("_", "-")
         if not (ctx / "Dockerfile").exists():
@@ -183,6 +194,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("vm", help="ex: vm_debian_min")
     ap.add_argument("--keep-work", action="store_true", help="garde work/ (console.log, disque brut)")
+    ap.add_argument("--nodockerbuild", action="store_true",
+                    help="ne pas rebuild les images docker: uploade celles déjà présentes dans Docker")
     a = ap.parse_args()
 
     conf = yaml.safe_load((ROOT / "conf.yml").read_text())
@@ -190,7 +203,7 @@ def main():
     qemu_dir = Path(conf["dir_qemu"])
     qemu, qimg = qemu_dir / "qemu-system-x86_64.exe", qemu_dir / "qemu-img.exe"
 
-    spec["_images"] = build_docker_images(spec)  # avant de démarrer la VM: échoue tôt
+    spec["_images"] = build_docker_images(spec, rebuild=not a.nodockerbuild)  # avant de démarrer la VM: échoue tôt
 
     base = ROOT / "cache" / spec["base"]
     download(spec["base_url"] + spec["base"], base)

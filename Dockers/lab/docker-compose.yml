@@ -1,11 +1,14 @@
 services:
 
 
-  lab_ttyd_base:
-    image: lab_ttyd_base:latest
-    container_name: lab_ttyd_base
+  lab_ttyd_pentest:
+    image: lab_ttyd_pentest:latest
+    container_name: lab_ttyd_pentest
     ports:
-      - "3000:3000"
+      - "3000:3000" # ttyd
+      - "8080:8080" # Brute
+      - "8081:8081" # HTTP Proxy
+      - "8082:8082" # Image Forensic
     networks:
       yolo_lan:
         ipv4_address: 10.0.1.10
